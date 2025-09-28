@@ -4,8 +4,78 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Doczilla — Тестовое задание №2</title>
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        .error {
+            color: red;
+            display: none;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            display: none;
+        }
+        </style>
     </head>
     <body>
-        task 2;
+        <h2>Загрузка файла</h2>
+        <input type="file" id="fileInput">
+        <button onclick="uploadFile()">Загрузить</button>
+        <div class="error" id="errorMessage"></div>
+        <div class="result" id="result">
+            <p>Ссылка на загруженный файл:</p>
+            <a id="fileLink" href="" target="_blank"></a>
+        </div>
+        <script>
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const errorMessage = document.getElementById('errorMessage');
+            const result = document.getElementById('result');
+            const fileLink = document.getElementById('fileLink');
+
+            errorMessage.style.display = 'none';
+            result.style.display = 'none';
+
+            if (!fileInput.files.length) {
+                errorMessage.textContent = 'Пожалуйста, выберите файл.';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch('/api/save-file', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.url) {
+                        result.style.display = 'block';
+                        fileLink.href = data.url;
+                        fileLink.textContent = data.url;
+                    } else {
+                        errorMessage.textContent = 'Ошибка: ссылка не получена.';
+                        errorMessage.style.display = 'block';
+                    }
+                } else {
+                    errorMessage.textContent = `Ошибка загрузки: ${response.statusText}`;
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                errorMessage.textContent = 'Ошибка сети при загрузке файла.';
+                errorMessage.style.display = 'block';
+            }
+        }
+        </script>
     </body>
 </html>

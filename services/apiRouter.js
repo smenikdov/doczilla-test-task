@@ -27,9 +27,11 @@ class ApiRouter extends ServerRouter {
         if (routeController) {
             try {
                 const result = await routeController.handler(req, res);
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify(result));
-                console.log(`API response: ${JSON.stringify(result)}`);
+                if (result) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify(result));
+                    console.log(`API response: ${JSON.stringify(result)}`);
+                }
             }
             catch (err) {
                 console.error(err);

@@ -7,13 +7,18 @@ class StaticRouter extends ServerRouter {
     constructor({
         routerPath = '/',
         staticPath = '/',
+        onRequest,
     } = {}) {
         super({ routerPath });
-        this.staticPath = path.join(process.cwd(), staticPath);
+        this.staticPath = staticPath;
+        this.onRequest = onRequest;
     }
 
     handleRequest(req, res) {
-        const [ url, query ] = req.url.split('?');
+        const url = req.url
+            .split('?')[0]
+            .replace(this.routerPath, '/')
+
         let filePath = path.join(
             this.staticPath,
             url === '/' ? 'index.html' : url
@@ -28,6 +33,9 @@ class StaticRouter extends ServerRouter {
         const contentType = MIME_TYPES[extname] || 'text/plain';
 
         try {
+            if (this.onRequest) {
+                this.onRequest(filePath);
+            }
             const content = fs.readFileSync(filePath);
             res.writeHead(200, { 'Content-Type': contentType });
             res.end(content, 'utf-8');
