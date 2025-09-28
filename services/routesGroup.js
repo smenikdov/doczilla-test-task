@@ -4,26 +4,26 @@ class RoutesGroup {
     }
 
     get(path, controller) {
-        this.registerRoute('GET', path, controller);
+        this.#registerRoute('GET', path, controller);
         return this;
     }
 
     post(path, controller) {
-        this.registerRoute('POST', path, controller);
+        this.#registerRoute('POST', path, controller);
         return this;
     }
 
     put(path, controller) {
-        this.registerRoute('PUT', path, controller);
+        this.#registerRoute('PUT', path, controller);
         return this;
     }
 
     delete(path, controller) {
-        this.registerRoute('DELETE', path, controller);
+        this.#registerRoute('DELETE', path, controller);
         return this;
     }
 
-    registerRoute(method, path, controller) {
+    #registerRoute(method, path, controller) {
         method = method.toUpperCase();
         if (!this.routes[method]) {
             this.routes[method] = {};
