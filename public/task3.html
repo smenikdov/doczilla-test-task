@@ -4,8 +4,110 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Doczilla — Тестовое задание №3</title>
+        <style>
+        body {
+            height: 100vh;
+        }
+        .container {
+        }
+        .chart-container {
+            display: flex;
+            width: 80%;
+            height: 300px;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        .bar {
+            flex-grow: 1;
+            position: relative;
+        }
+        .bar-label {
+            position: absolute;
+            top: -20px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #000;
+        }
+        .temp-label {
+            position: absolute;
+            bottom: -20px;
+            width: 100%;
+            text-align: center;
+            font-size: 12px;
+            color: #000;
+        }
+        </style>
     </head>
     <body>
-        task 3;
+        <div class="container">
+            <form id="cityForm">
+                <input type="text" id="cityInput" placeholder="Введите название города" required>
+                <button type="submit">Получить погоду</button>
+            </form>
+            <div id="chartContainer" class="chart-container"></div>
+        </div>
+
+        <script>
+            const form = document.getElementById('cityForm');
+            const cityInput = document.getElementById('cityInput');
+            const chartContainer = document.getElementById('chartContainer');
+
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const city = cityInput.value.trim();
+
+                if (!city) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/weather?city=${city}`, {
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Город не найден или ошибка API');
+                    }
+                    const data = await response.json();
+                    let { time, temperature_2m: temperatures } = data;
+                    time = time.map(item => new Date(item).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }));
+
+                    const barWidthPercent = 100 / time.length;
+
+                    chartContainer.innerHTML = '';
+                    temperatures.forEach((temp, index) => {
+                        const bar = document.createElement('div');
+                        bar.className = 'bar';
+                        bar.style.width = `${barWidthPercent}%`;
+                        bar.style.height = `${Math.abs(temp) * 3}px`;
+
+
+                        if (temp > 0) {
+                            bar.style.backgroundColor = '#007bff';
+                        } else {
+                            bar.style.backgroundColor = '#dc3545';
+                            bar.style.transform = 'translateY(100%)';
+                        }
+
+                        const timeLabel = document.createElement('div');
+                        timeLabel.className = 'bar-label';
+                        timeLabel.textContent = time[index];
+                        bar.appendChild(timeLabel);
+
+                        const tempLabel = document.createElement('div');
+                        tempLabel.className = 'temp-label';
+                        tempLabel.textContent = `${Math.round(temp)}°C`;
+                        bar.appendChild(tempLabel);
+
+                        chartContainer.appendChild(bar);
+                    });
+                } catch (error) {
+                    console.error('Ошибка:', error.message);
+                }
+            });
+        </script>
     </body>
 </html>
